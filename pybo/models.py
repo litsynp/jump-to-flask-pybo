@@ -6,6 +6,7 @@ class Question(db.Model):
     subject = db.Column(db.String(200), nullable=False)
     content = db.Column(db.Text(), nullable=False)
     created_at = db.Column(db.DateTime(), nullable=False)
+    updated_at = db.Column(db.DateTime(), nullable=True)
     user_id = db.Column(db.Integer,
                         db.ForeignKey('user.id', ondelete='CASCADE'),
                         nullable=False)
@@ -20,6 +21,7 @@ class Answer(db.Model):
                                backref=db.backref('answer_set', cascade='all, delete-orphan'))
     content = db.Column(db.Text(), nullable=False)
     created_at = db.Column(db.DateTime(), nullable=False)
+    updated_at = db.Column(db.DateTime(), nullable=True)
     user_id = db.Column(db.Integer,
                         db.ForeignKey('user.id', ondelete='CASCADE'),
                         nullable=False)

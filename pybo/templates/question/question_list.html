@@ -15,6 +15,11 @@
         <td>{{ question_list.total - ((question_list.page-1) * question_list.per_page) - loop.index0 }}</td>
         <td>
           <a href="{{ url_for('question.detail', question_id=question.id) }}">{{ question.subject }}</a>
+          <!-- 답변 개수 표시 시작 -->
+          {% if question.answer_set|length > 0 %}
+          <span class="text-danger small ml-2">{{ question.answer_set|length }}</span>
+          {% endif %}
+          <!-- 답변 개수 표시 종료 -->
         </td>
         <td>{{ question.created_at|datetime }}</td>
       </tr>

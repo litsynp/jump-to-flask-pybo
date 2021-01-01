@@ -11,11 +11,6 @@ class Question(db.Model):
                         nullable=False)
     user = db.relationship('User', backref=db.backref('question_set'))
 
-    def as_dict(self):
-        return {
-
-        }
-
 
 class Answer(db.Model):
     id = db.Column(db.Integer, primary_key=True)

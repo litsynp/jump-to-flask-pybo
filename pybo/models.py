@@ -1,0 +1,24 @@
+from pybo import db
+
+
+class Question(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    subject = db.Column(db.String(200), nullable=False)
+    content = db.Column(db.Text(), nullable=False)
+    created_at = db.Column(db.DateTime(), nullable=False)
+
+    def as_dict(self):
+        return {
+
+        }
+
+
+class Answer(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    question_id = db.Column(db.Integer, db.ForeignKey(
+        'question.id', ondelete='CASCADE'))
+    question = db.relationship(
+        'Question',
+        backref=db.backref('answer_set', cascade='all, delete-orphan'))
+    content = db.Column(db.Text(), nullable=False)
+    created_at = db.Column(db.DateTime(), nullable=False)

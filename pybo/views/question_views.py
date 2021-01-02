@@ -2,10 +2,11 @@ from datetime import datetime
 
 from flask import Blueprint, render_template, request, url_for, g, flash
 from werkzeug.utils import redirect
+from sqlalchemy import func
 
 from pybo import db
 from pybo.forms import QuestionForm, AnswerForm
-from pybo.models import Question, Answer, User
+from pybo.models import Question, Answer, User, question_voter
 from pybo.views.auth_views import login_required
 
 bp = Blueprint('question', __name__, url_prefix='/question')
@@ -15,10 +16,29 @@ bp = Blueprint('question', __name__, url_prefix='/question')
 def _list():
     # 입력 파라미터
     page = request.args.get('page', type=int, default=1)
-    kw = request.args.get('kw', type=str, default='')
+    kw = request.args.get('kw', type=str, default='')  # 검색 키워드
+    so = request.args.get('so', type=str, default='recent')  # 검색 옵션
 
-    # 조회
-    question_list = Question.query.order_by(Question.create_date.desc())
+    # 정렬
+    if so == 'recommend':
+        # 추천수 정렬
+        sub_query = db.session.query(question_voter.c.question_id, func.count('*').label('num_voter')) \
+            .group_by(question_voter.c.question_id).subquery()
+        question_list = Question.query \
+            .outerjoin(sub_query, Question.id == sub_query.c.question_id) \
+            .order_by(sub_query.c.num_voter.desc(), Question.created_at.desc())
+    elif so == 'popular':
+        # 인기순 정렬 (답변 개수)
+        sub_query = db.session.query(Answer.question_id, func.count('*').label('num_answer')) \
+            .group_by(Answer.question_id).subquery()
+        question_list = Question.query \
+            .outerjoin(sub_query, Question.id == sub_query.c.question_id) \
+            .order_by(sub_query.c.num_answer.desc(), Question.created_at.desc())
+    else:  # recent
+        # 날짜순 정렬
+        question_list = Question.query.order_by(Question.created_at.desc())
+
+    # 검색 및 조회
     if kw:
         search = '%%{}%%'.format(kw)
         sub_query = db.session.query(Answer.question_id, Answer.content, User.username) \
@@ -36,7 +56,7 @@ def _list():
 
     # 페이징
     question_list = question_list.paginate(page, per_page=10)
-    return render_template('question/question_list.html', question_list=question_list, page=page, kw=kw)
+    return render_template('question/question_list.html', question_list=question_list, page=page, kw=kw, so=so)
 
 
 @bp.route('/detail/<int:question_id>/')

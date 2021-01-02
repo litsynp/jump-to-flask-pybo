@@ -1,6 +1,5 @@
 from pybo import db
 
-
 question_voter = db.Table(
     'question_voter',
     db.Column('user_id',

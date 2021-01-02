@@ -150,3 +150,6 @@ dmypy.json
 
 # DB files
 *.db
+
+# vscode
+.vscode/
